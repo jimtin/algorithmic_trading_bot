@@ -9,7 +9,7 @@ import ema_cross_strategy
 import make_trade
 
 # Location of settings.json
-settings_filepath = "settings.json" # <- This can be modified to be your own settings filepath
+settings_filepath = "../tutorial/settings.json" # <- This can be modified to be your own settings filepath
 
 
 # Function to import settings from settings.json

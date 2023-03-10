@@ -29,14 +29,11 @@ to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 9. [How to Calculate Lot Size for Your MetaTrader 5 Python Trading Bot](https://youtu.be/fveyPFreenk)
 10. [How to Create Orders with Your MetaTrader Python Trading Bot](https://youtu.be/fveyPFreenk)
 
-### Medium
+### Blog Articles
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 
 check out these articles:
-- 
+- [Build Your Own AutoTrading Bot](https://www.algoquant.trade/post/build-your-own-autotrading-bot)
+- [From Trading Idea to Automated Strategy: Your How To Guide](https://www.algoquant.trade/post/from-trading-idea-to-automated-strategy-your-how-to-guide)
+- [Never Miss a Trade Again with an AutoTrading Bot](https://www.algoquant.trade/post/never-miss-a-trade-again-with-an-auto-trading-bot)
 
-
-## Indicators
-- Exponential Moving Average (EMA)
-- Exponential Moving Average Cross (EMA Cross)
-- Doji Star
 

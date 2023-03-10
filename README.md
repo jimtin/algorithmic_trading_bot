@@ -18,9 +18,16 @@ If you are looking for a standalone product, please check out our [AlgoQuant.Tra
 ### YouTube
 YouTube channel [algoquant_trade](https://www.youtube.com/@algoquant_trade) contains tons of helpful content on how
 to use the Algo Trading Bot or build one for yourself. Check out these episodes:
-- [Secure Setup](https://www.youtube.com/watch?v=jpw3JltNMg0)
-- [Connect To MetaTrader 5 with Python](https://www.youtube.com/watch?v=EkP7iAZoMEw&t=2s)
-- [Retrieve 50000 Candlesticks from MetaTrader](https://www.youtube.com/watch?v=KZmVek6EDCg)
+1. [Secure Setup](https://www.youtube.com/watch?v=jpw3JltNMg0)
+2. [Connect To MetaTrader 5 with Python](https://www.youtube.com/watch?v=EkP7iAZoMEw&t=2s)
+3. [Retrieve 50000 Candlesticks from MetaTrader](https://www.youtube.com/watch?v=KZmVek6EDCg)
+4. [Add the EMA Indicator to Your Algorithmic AutoTrading Bot](https://youtu.be/QqLjXecrKhc)
+5. [How to Install TALib on Windows](https://youtu.be/jnxqu9MhBIE)
+6. [Build Your Own AutoTrading Bot EMA Cross Detector](https://youtu.be/lbdO_UKEzQU)
+7. [How to Trade the EMA Cross Strategy with Your AutoTrading Bot](https://youtu.be/A6RTl0_13pw)
+8. [How to Convert Your AutoTrading Bot Strategy into BUY and SELL Signals](https://youtu.be/21NtSVuPaZw)
+9. [How to Calculate Lot Size for Your MetaTrader 5 Python Trading Bot](https://youtu.be/fveyPFreenk)
+10. [How to Create Orders with Your MetaTrader Python Trading Bot](https://youtu.be/fveyPFreenk)
 
 ### Medium
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 

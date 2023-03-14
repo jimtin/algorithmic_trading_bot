@@ -1,0 +1,10 @@
+{
+    "mt5": {
+        "username": "01234567",
+        "password": "your_secret_password",
+        "server": "Server_from_Broker",
+        "mt5_pathway": "C:/Path/To/terminal64.exe",
+        "symbols": ["USDJPY.a"],
+        "timeframe": "M30"
+    }
+}

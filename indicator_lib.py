@@ -1,5 +1,8 @@
 import pandas
 import numpy as np
+import talib
+import display_lib
+
 
 # Define a function to calculate an EMA of any size
 def calc_ema(dataframe, ema_size):
@@ -59,3 +62,30 @@ def calc_ema_cross(dataframe, ema_one, ema_two):
     dataframe = dataframe.drop(columns='pre_position')
     # Return dataframe
     return dataframe
+
+
+# Function to calculate a MACD Indicator
+def calc_macd(dataframe, display=False, symbol=None):
+    """
+    Function to calculate a MACD indicator
+    :param dataframe: dataframe of the raw candlestick data
+    :return: dataframe with MACD values included
+    """
+    # Calculate the MACD values in the dataframe
+    dataframe['macd'], dataframe['macd_signal'], dataframe['macd_histogram'] = talib.MACD(
+        dataframe['close'],
+        fastperiod=12,
+        slowperiod=26,
+        signalperiod=9
+    )
+    if display:
+        title = symbol + " MACD Indicator"
+        fig = display_lib.display_macd_indicator(
+            dataframe=dataframe,
+            title=title
+        )
+        # Return the dataframe
+        return fig
+    else:
+        # If not displaying, return the dataframe
+        return dataframe

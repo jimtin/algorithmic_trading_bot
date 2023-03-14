@@ -16,6 +16,7 @@ If you are looking for a standalone product, please check out our [AlgoQuant.Tra
 
 ## How To Guides and Tutorials
 ### YouTube
+#### Series: Build Your Own MetaTrader 5 Python Trading Bot
 YouTube channel [algoquant_trade](https://www.youtube.com/@algoquant_trade) contains tons of helpful content on how
 to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 1. [Secure Setup](https://www.youtube.com/watch?v=jpw3JltNMg0)
@@ -28,6 +29,7 @@ to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 8. [How to Convert Your AutoTrading Bot Strategy into BUY and SELL Signals](https://youtu.be/21NtSVuPaZw)
 9. [How to Calculate Lot Size for Your MetaTrader 5 Python Trading Bot](https://youtu.be/fveyPFreenk)
 10. [How to Create Orders with Your MetaTrader Python Trading Bot](https://youtu.be/fveyPFreenk)
+11. [How to Create Orders with Your MetaTrader 5 Python Trading Bot Pt 2](https://youtu.be/nn8XQgFN5W8)
 
 ### Blog Articles
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 

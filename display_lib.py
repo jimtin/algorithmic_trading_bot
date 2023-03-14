@@ -11,12 +11,14 @@ def display_graph(plotly_fig, graph_title, dash=False, upload=False):
     :param graph_title: string
     :return: None
     """
-    # Add in autoscaling for each plotly figure
+    # Add in layout features for each plotly figure
     plotly_fig.update_layout(
-        autosize=True
+        xaxis_rangeslider_visible=False,
+        autosize=True,
+        height=800
     )
     plotly_fig.update_yaxes(automargin=True)
-    plotly_fig.update_layout(xaxis_rangeslider_visible=False)
+
 
 
     if dash:

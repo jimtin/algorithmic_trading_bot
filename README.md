@@ -1,4 +1,5 @@
 # AlgoQuant.Trade Algorthmic AutoTrading Bot
+
 Algo Trading Bot contains the Python code for an algorithmic trading bot designed and built by James Hinton. It is a 
 partner program to [AlgoQuant.trade](https://www.algoquant.trade/), and can be used either standalone or in conjunction
 with our How To Guides.

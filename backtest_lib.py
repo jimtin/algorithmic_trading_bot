@@ -6,31 +6,33 @@ import indicator_lib
 import talib
 import mt5_lib
 import pandas
-from multiprocessing import Queue
-from multiprocessing import Process
-from threading import Thread
 import os
 
 
 # Function to multi-optimize a strategy
-def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange):
+def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, time_to_test, params={}):
     """
     Function to run a backtest optimizing across symbols, timeframes
     :param strategy: string of the strategy to be tested
     :param cash: integer of the cash to start with
     :param commission: decimal value of the percentage commission fees
-    :param symbol: string of the symbol to be tested
-    :param timeframe: string of the timeframe to be tested
-    :param params: json dict of the parameters to be passed to the strategy
+    :param symbols: string of the symbol to be tested
+    :param timeframes: string of the timeframe to be tested
+    :param exchange: string identifying the exchange to retreive data from
+    :param time_to_test: string identifying the timeframe to test. Options are: 1Month, 3Months, 6Months, 1Year, 2Years,
+    3Years, 5Years, All
+    :param params: dictionary of parameters to be optimized
     :return:
     """
-    # Todo: add in args to support different strategies which may need different optimization parameters
-    # Todo: Change the data gathering so that it supports getting a time range of data instead of a number of candles
+
     # Todo: Add in support for FOREX
     # Todo: Add in support for crypto
     # Todo: Add in support for other exchanges
     # Todo: Add in lot size support
     # Todo: Add in support for using custom indicators
+    # Check the time_to_test variable for approved values
+    if time_to_test not in ["1Month", "3Months", "6Months", "1Year", "2Years", "3Years", "5Years", "All"]:
+        raise ValueError("Chosen time_to_test range not supported")
     # Instantiate an empty list to store results
     results_list = []
     # Create a list of arguments to pass to the run_backtest function
@@ -41,18 +43,23 @@ def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange):
         for timeframe in timeframes:
             # Get data from exchange. Keep this single threaded
             if exchange == "mt5":
-                data = mt5_lib.query_historic_data(
+                data = mt5_lib.query_historic_data_by_time(
                     symbol=symbol,
                     timeframe=timeframe,
-                    number_of_candles=10000
+                    time_range=time_to_test
                 )
                 # Get current working directory
                 save_location = os.path.abspath(os.getcwd())
                 # Create the save path
-                plot_save_path = f"{save_location}" + "/plots/" + f"{strategy}" + "_" + f"{exchange}" + "_" + f"{symbol}" + "_" + f"{timeframe}" + "_" + f"{cash}" + "_" + f"{commission}" + "_" + ".html"
-                result_save_path = f"{save_location}" + "/results/" + f"{strategy}" + "_" + f"{exchange}" + "_" + f"{symbol}" + "_" + f"{timeframe}" + "_" + f"{cash}" + "_" + f"{commission}" + "_" + ".json"
+                plot_save_path = f"{save_location}" + "/plots/" + f"{strategy}" + "_" + f"{exchange}" + "_" + \
+                                 f"{symbol}" + "_" + f"{timeframe}" + "_" + f"{cash}" + "_" + f"{commission}" + "_" + \
+                                 ".html"
+                result_save_path = f"{save_location}" + "/results/" + f"{strategy}" + "_" + f"{exchange}" + "_" + \
+                                   f"{symbol}" + "_" + f"{timeframe}" + "_" + f"{cash}" + "_" + f"{commission}" + "_" \
+                                   + ".json"
                 # Create tuple
-                args_tuple = (data, strategy, cash, commission, True, True, plot_save_path, result_save_path, symbol, timeframe, exchange)
+                args_tuple = (data, strategy, cash, commission, symbol, timeframe, exchange, True, True,
+                              plot_save_path, result_save_path, params)
                 # Append to args_list
                 args_list.append(args_tuple)
             else:
@@ -68,7 +75,8 @@ def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange):
     return True
 
 
-def run_backtest(data, strategy, cash, commission, optimize=False, save=False, plot_save_location=None, result_save_location=None, symbol=None, timeframe=None, exchange=None):
+def run_backtest(data, strategy, cash, commission, symbol, timeframe, exchange, optimize=False, save=False,
+                 plot_save_location=None, result_save_location=None, params={}):
     """
     Function to run a backtest
     :param data: raw dataframe to use for backtesting
@@ -78,6 +86,7 @@ def run_backtest(data, strategy, cash, commission, optimize=False, save=False, p
     :return: backtest outcomes
     """
     print("Processing")
+    ### Reformat dataframe to match backtesting.py requirements
     # Create a new column with name Open using open
     data['Open'] = data['open']
     # Create a new column with name Close using close
@@ -91,20 +100,25 @@ def run_backtest(data, strategy, cash, commission, optimize=False, save=False, p
     # Get the strategy class
     if strategy == "EMACross":
         strategy = EMACross
-    # Initialize the backtest
-    backtest = Backtest(data, strategy, cash=cash, commission=commission)
-    # If optimize is true, optimize the strategy
-    if optimize:
-        # Optimize the strategy
-        stats = backtest.optimize(
-            n1=range(5, 50, 1),
-            n2=range(50, 200, 1),
-            maximize='Equity Final [$]',
-            constraint=lambda p: p.n1 < p.n2
-        )
+        # Initialize the backtest
+        backtest = Backtest(data, strategy, cash=cash, commission=commission)
+        # If optimize is true, optimize the strategy
+        if optimize:
+            # Optimize the strategy
+            stats = backtest.optimize(
+                n1=params['n1'],
+                n2=params['n2'],
+                maximize='Equity Final [$]',
+                constraint=lambda p: p.n1 < p.n2
+            )
+        else:
+            # Run the backtest
+            stats = backtest.run(
+                n1=params['n1'],
+                n2=params['n2']
+            )
     else:
-        # Run the backtest
-        stats = backtest.run()
+        raise ValueError("Strategy not supported")
     # If save is true, save the backtest
     if save:
         backtest.plot(filename=plot_save_location, open_browser=False)
@@ -126,6 +140,7 @@ class EMACross(Strategy):
     n2 = 50
 
     def init(self):
+        #print(f"Testing EMA Cross Strategy with Parameters: N1 = {self.n1}, N2 = {self.n2}")
         self.ema_1 = self.I(talib.EMA, self.data.Close, self.n1)
         self.ema_2 = self.I(talib.EMA, self.data.Close, self.n2)
 

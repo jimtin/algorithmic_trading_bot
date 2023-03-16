@@ -1,5 +1,7 @@
 import MetaTrader5
 import pandas
+import datetime
+from dateutil.relativedelta import relativedelta
 
 
 # Function to start MetaTrader 5
@@ -357,6 +359,48 @@ def query_historic_data(symbol, timeframe, number_of_candles):
     mt5_timeframe = set_query_timeframe(timeframe=timeframe)
     # Retrieve the data
     rates = MetaTrader5.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
+    # Convert to a dataframe
+    dataframe = pandas.DataFrame(rates)
+    # Add a 'Human Time' column
+    dataframe['human_time'] = pandas.to_datetime(dataframe['time'], unit='s')
+    return dataframe
+
+
+# Function to retrieve data from MT5 using a time range rather than a number of candles
+def query_historic_data_by_time(symbol, timeframe, time_range):
+    """
+    Function to retrieve data from MT5 using a time range rather than a number of candles
+    :param symbol: string of the symbol to be retrieved
+    :param timeframe: string of the candlestick timeframe to be retrieved
+    :param time_range: string of the time range to be retrieved. Options are: 1Month, 3Months, 6Months, 1Year, 2Years, 3Years, 5Years, All
+    :return: dataframe of the queried data
+    """
+    # Convert the timeframe into MT5 friendly format
+    mt5_timeframe = set_query_timeframe(timeframe=timeframe)
+    # Get the end datetime of the time range (i.e. now)
+    end_time = datetime.datetime.now()
+    # Get the start datetime of the time range, based on the time range string
+    if time_range == "1Month":
+        start_time = end_time - relativedelta(months=1)
+    elif time_range == "3Months":
+        start_time = end_time - relativedelta(months=3)
+    elif time_range == "6Months":
+        start_time = end_time - relativedelta(months=6)
+    elif time_range == "1Year":
+        start_time = end_time - relativedelta(years=1)
+    elif time_range == "2Years":
+        start_time = end_time - relativedelta(years=2)
+    elif time_range == "3Years":
+        start_time = end_time - relativedelta(years=3)
+    elif time_range == "5Years":
+        start_time = end_time - relativedelta(years=5)
+    elif time_range == "All":
+        start_time = datetime.datetime(1970, 1, 1)
+    else:
+        raise ValueError("Incorrect time range provided")
+
+    # Retrieve the data
+    rates = MetaTrader5.copy_rates_range(symbol, mt5_timeframe,start_time, end_time)
     # Convert to a dataframe
     dataframe = pandas.DataFrame(rates)
     # Add a 'Human Time' column

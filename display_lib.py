@@ -4,11 +4,12 @@ from plotly.subplots import make_subplots
 
 
 # Function to display a plotly graph in dash
-def display_graph(plotly_fig, graph_title, dash=False, upload=False):
+def display_graph(plotly_fig, graph_title, dash=False):
     """
     Function to display a plotly graph using Dash
     :param plotly_fig: plotly figure
     :param graph_title: string
+    :param dash: boolean to determine whether to run the dash server
     :return: None
     """
     # Add in layout features for each plotly figure
@@ -18,8 +19,6 @@ def display_graph(plotly_fig, graph_title, dash=False, upload=False):
         height=800
     )
     plotly_fig.update_yaxes(automargin=True)
-
-
 
     if dash:
         # Create the Dash object

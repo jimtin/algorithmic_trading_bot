@@ -10,6 +10,7 @@ import indicator_lib
 import mt5_lib
 import ema_cross_strategy
 import make_trade
+import backtest_lib
 
 # Location of settings.json
 settings_filepath = "../tutorial/settings.json" # <- This can be modified to be your own settings filepath
@@ -68,15 +69,28 @@ if __name__ == '__main__':
     mt5_start = mt5_startup(project_settings=project_settings)
     pandas.set_option('display.max_columns', None)
     comment = "ema_cross_strategy"
+    # Start a Performance timer
+    perf_start = time.perf_counter()
     # If MT5 starts correctly, lets query for some candles
     if mt5_start:
-        symbol = "BTCUSD.a"
-        # Get data from MT5
-        data = mt5_lib.query_historic_data(
-            symbol=symbol,
-            timeframe="M30",
-            number_of_candles=1000
+        """
+        results = backtest_lib.multi_optimize(
+            strategy="EMACross",
+            cash=10000,
+            commission=0.002,
+            symbols=["ETHUSD.a"],
+            timeframes=["M5", "H1", "H2", "H6"],
+            exchange="mt5"
         )
-        # Get the MACD data
-        macd_fig = indicator_lib.calc_macd(data, display=True, symbol=symbol)
-        display_lib.display_graph(plotly_fig=macd_fig, graph_title="MACD_Example", dash=True)
+        """
+        results = backtest_lib.multi_optimize(
+            strategy="EMACross",
+            cash=10000,
+            commission=0.002,
+            symbols=["ETHUSD.a", "XRPUSD.a"],
+            timeframes=["M1", "M2", "M3", "M5", "H1", "H2", "H3", "H4", "H6", "H8", "H12", "D1"],
+            exchange="mt5"
+        )
+        print("Completed")
+        pef_end = time.perf_counter()
+        print(f"Total time: {pef_end - perf_start}")

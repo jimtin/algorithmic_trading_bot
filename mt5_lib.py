@@ -406,3 +406,44 @@ def query_historic_data_by_time(symbol, timeframe, time_range):
     # Add a 'Human Time' column
     dataframe['human_time'] = pandas.to_datetime(dataframe['time'], unit='s')
     return dataframe
+
+
+# Function to retrieve the pip_size of a symbol from MT5
+def get_pip_size(symbol):
+    """
+    Function to retrieve the pip size of a symbol from MetaTrader 5
+    :param symbol: string of the symbol to be queried
+    :return: float of the pip size
+    """
+    # Get the symbol information
+    symbol_info = MetaTrader5.symbol_info(symbol)
+    tick_size = symbol_info.trade_tick_size
+    pip_size = tick_size * 10
+    # Return the pip size
+    return pip_size
+
+
+# Function to retrieve the base currency of a symbol from MT5
+def get_base_currency(symbol):
+    """
+    Function to retrieve the base currency of a symbol from MetaTrader 5
+    :param symbol: string of the symbol to be queried
+    :return: string of the base currency
+    """
+    # Get the symbol information
+    symbol_info = MetaTrader5.symbol_info(symbol)
+    # Return the base currency
+    return symbol_info.currency_base
+
+
+# Function to retrieve the exchange rate of a symbol from MT5
+def get_exchange_rate(symbol):
+    """
+    Function to retrieve the exchange rate of a symbol from MetaTrader 5
+    :param symbol: string of the symbol to be queried
+    :return: float of the exchange rate
+    """
+    # Get the symbol information
+    symbol_info = MetaTrader5.symbol_info(symbol)
+    # Return the exchange rate
+    return symbol_info.bid

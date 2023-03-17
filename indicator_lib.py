@@ -64,6 +64,31 @@ def calc_ema_cross(dataframe, ema_one, ema_two):
     return dataframe
 
 
+# Function to calculate a generic crossover event
+def calc_crossover(dataframe, column_one, column_two):
+    """
+    Function to calculate a generic crossover event
+    :param dataframe: Panda's Dataframe object
+    :param column_one: string of the column name of the first column
+    :param column_two: string of the column name of the second column
+    :return: dataframe with cross events
+    """
+    # Create a position column
+    dataframe['position'] = dataframe[column_one] > dataframe[column_two]
+    # Create a pre-position column which is the previous row shifted by 1
+    dataframe['pre_position'] = dataframe['position'].shift(1)
+    # Drop any NA values
+    dataframe.dropna(inplace=True)
+    # Define Crossover events
+    dataframe['crossover'] = np.where(dataframe['position'] == dataframe['pre_position'], False, True)
+    # Remove the 'position' column
+    dataframe = dataframe.drop(columns='position')
+    # Remove the 'pre_position' column
+    dataframe = dataframe.drop(columns='pre_position')
+    # Return dataframe
+    return dataframe
+
+
 # Function to calculate EMA using ta-lib
 def calc_ema_ta(dataframe, ema_size, display=False, symbol=None, fig=None):
     """
@@ -92,10 +117,13 @@ def calc_ema_ta(dataframe, ema_size, display=False, symbol=None, fig=None):
 
 
 # Function to calculate a MACD Indicator
-def calc_macd(dataframe, display=False, symbol=None):
+def calc_macd(dataframe, macd_fast=12, macd_slow=26, macd_signal=9, display=False, symbol=None):
     """
     Function to calculate a MACD indicator
     :param dataframe: dataframe of the raw candlestick data
+    :param macd_fast: integer of the fast EMA size
+    :param macd_slow: integer of the slow EMA size
+    :param macd_signal: integer of the signal EMA size
     :param display: boolean to determine whether the MACD indicator should be displayed
     :param symbol: string of the symbol to be displayed on the graph
     :return: dataframe with MACD values included
@@ -103,9 +131,9 @@ def calc_macd(dataframe, display=False, symbol=None):
     # Calculate the MACD values in the dataframe
     dataframe['macd'], dataframe['macd_signal'], dataframe['macd_histogram'] = talib.MACD(
         dataframe['close'],
-        fastperiod=12,
-        slowperiod=26,
-        signalperiod=9
+        fastperiod=macd_fast,
+        slowperiod=macd_slow,
+        signalperiod=macd_signal
     )
     if display:
         title = symbol + " MACD Indicator"

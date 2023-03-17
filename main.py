@@ -8,6 +8,7 @@ import time
 import display_lib
 import indicator_lib
 import mt5_lib
+import macd_crossover_strategy
 import ema_cross_strategy
 import make_trade
 import backtest_lib
@@ -73,9 +74,18 @@ if __name__ == '__main__':
     perf_start = time.perf_counter()
     # If MT5 starts correctly, lets query for some candles
     if mt5_start:
+        strat = macd_crossover_strategy.macd_crossover_strategy(
+            symbol="ETHUSD.a",
+            timeframe="H1",
+            exchange="mt5",
+        )
+        print(strat)
+        # Extract only true crossover signals
+        cross_events = strat[strat["crossover"] == True]
+        print(cross_events)
         # Set the parameters
-        params = {"n1": range(10, 15, 1), "n2": range(50, 70, 1)}
         """
+        params = {"n1": range(10, 15, 1), "n2": range(50, 70, 1)}
         data = mt5_lib.query_historic_data(
             symbol="ETHUSD.a",
             timeframe="H1",
@@ -92,19 +102,19 @@ if __name__ == '__main__':
             params=params
         )
         print(results)
-        """
+        
         # Get the candles
         results = backtest_lib.multi_optimize(
             strategy="EMACross",
             cash=10000,
             commission=0.002,
             symbols=["ETHUSD.a"],
-            timeframes=["H1", "H2", "H6"],
+            timeframes=["H1"],
             exchange="mt5",
             time_to_test="3Months",
             params=params
         )
-        """
+       
         results = backtest_lib.multi_optimize(
             strategy="EMACross",
             cash=10000,

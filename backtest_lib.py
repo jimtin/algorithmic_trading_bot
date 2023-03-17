@@ -7,10 +7,12 @@ import talib
 import mt5_lib
 import pandas
 import os
+import helper_functions
 
 
 # Function to multi-optimize a strategy
-def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, time_to_test, params={}):
+def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, time_to_test, params={}, forex=False,
+                   risk_percent=None):
     """
     Function to run a backtest optimizing across symbols, timeframes
     :param strategy: string of the strategy to be tested
@@ -24,11 +26,6 @@ def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, ti
     :param params: dictionary of parameters to be optimized
     :return:
     """
-
-    # Todo: Add in support for FOREX
-    # Todo: Add in support for crypto
-    # Todo: Add in support for other exchanges
-    # Todo: Add in lot size support
     # Todo: Add in support for using custom indicators
     # Check the time_to_test variable for approved values
     if time_to_test not in ["1Month", "3Months", "6Months", "1Year", "2Years", "3Years", "5Years", "All"]:
@@ -59,7 +56,7 @@ def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, ti
                                    + ".json"
                 # Create tuple
                 args_tuple = (data, strategy, cash, commission, symbol, timeframe, exchange, True, True,
-                              plot_save_path, result_save_path, params)
+                              plot_save_path, result_save_path, params, forex, risk_percent)
                 # Append to args_list
                 args_list.append(args_tuple)
             else:
@@ -76,7 +73,7 @@ def multi_optimize(strategy, cash, commission, symbols, timeframes, exchange, ti
 
 
 def run_backtest(data, strategy, cash, commission, symbol, timeframe, exchange, optimize=False, save=False,
-                 plot_save_location=None, result_save_location=None, params={}):
+                 plot_save_location=None, result_save_location=None, params={}, forex=False, risk_percent=None):
     """
     Function to run a backtest
     :param data: raw dataframe to use for backtesting
@@ -86,58 +83,65 @@ def run_backtest(data, strategy, cash, commission, symbol, timeframe, exchange, 
     :return: backtest outcomes
     """
     print("Processing")
-    ### Reformat dataframe to match backtesting.py requirements
-    # Create a new column with name Open using open
-    data['Open'] = data['open']
-    # Create a new column with name Close using close
-    data['Close'] = data['close']
-    # Create a new column with name High using high
-    data['High'] = data['high']
-    # Create a new column with name Low using low
-    data['Low'] = data['low']
-    # Set index to human_time
-    data.set_index('human_time', inplace=True)
-    # Get the strategy class
-    if strategy == "EMACross":
-        strategy = EMACross
-        # Initialize the backtest
-        backtest = Backtest(data, strategy, cash=cash, commission=commission)
-        # If optimize is true, optimize the strategy
-        if optimize:
-            # Optimize the strategy
-            stats = backtest.optimize(
-                n1=params['n1'],
-                n2=params['n2'],
-                maximize='Equity Final [$]',
-                constraint=lambda p: p.n1 < p.n2
-            )
-        else:
-            # Run the backtest
-            stats = backtest.run(
-                n1=params['n1'],
-                n2=params['n2']
-            )
+    if forex:
+        print(f"Forex testing framework in use")
     else:
-        raise ValueError("Strategy not supported")
-    # If save is true, save the backtest
-    if save:
-        backtest.plot(filename=plot_save_location, open_browser=False)
-    # Update with information about the backtest
-    stats['Strategy'] = strategy
-    stats['Cash'] = cash
-    stats['Commission'] = commission
-    stats['Symbol'] = symbol
-    stats['Timeframe'] = timeframe
-    stats['Exchange'] = exchange
-    if save:
-        stats.to_json(result_save_location)
+        print(f"Stock testing framework in use")
+        ### Reformat dataframe to match backtesting.py requirements
+        # Create a new column with name Open using open
+        data['Open'] = data['open']
+        # Create a new column with name Close using close
+        data['Close'] = data['close']
+        # Create a new column with name High using high
+        data['High'] = data['high']
+        # Create a new column with name Low using low
+        data['Low'] = data['low']
+        # Set index to human_time
+        data.set_index('human_time', inplace=True)
+        # Get the strategy class
+        if strategy == "EMACross":
+            strategy = EMACross
+            # Initialize the backtest
+            backtest = Backtest(data, strategy, cash=cash, commission=commission)
+            # If optimize is true, optimize the strategy
+            if optimize:
+                # Optimize the strategy
+                stats = backtest.optimize(
+                    n1=params['n1'],
+                    n2=params['n2'],
+                    maximize='Equity Final [$]',
+                    constraint=lambda p: p.n1 < p.n2
+                )
+            else:
+                # Run the backtest
+                stats = backtest.run(
+                    n1=params['n1'],
+                    n2=params['n2']
+                )
+        else:
+            raise ValueError("Strategy not supported")
+        # If save is true, save the backtest
+        if save:
+            backtest.plot(filename=plot_save_location, open_browser=False)
+        # Update with information about the backtest
+        stats['Strategy'] = strategy
+        stats['Cash'] = cash
+        stats['Commission'] = commission
+        stats['Symbol'] = symbol
+        stats['Timeframe'] = timeframe
+        stats['Exchange'] = exchange
+        stats['Forex'] = forex
+        stats['Risk_Percent'] = risk_percent
+        if save:
+            stats.to_json(result_save_location)
 
-    return stats
+        return stats
 
 
 class EMACross(Strategy):
     n1 = 20
     n2 = 50
+    forex = False
 
     def init(self):
         #print(f"Testing EMA Cross Strategy with Parameters: N1 = {self.n1}, N2 = {self.n2}")
@@ -145,10 +149,28 @@ class EMACross(Strategy):
         self.ema_2 = self.I(talib.EMA, self.data.Close, self.n2)
 
     def next(self):
-        if crossover(self.ema_1, self.ema_2):
-            self.position.close()
-            self.buy()
-        elif crossover(self.ema_2, self.ema_1):
-            self.position.close()
-            self.sell()
 
+        if crossover(self.ema_1, self.ema_2):
+            # Close any open positions
+            self.position.close()
+            # Create a buy order
+            self.order_create("BUY")
+        elif crossover(self.ema_2, self.ema_1):
+            # Close open positions
+            self.position.close()
+            # Create the order
+            self.order_create("SELL")
+
+    def order_create(self, order_type):
+        if order_type == "BUY":
+            # Create a stop price for the order at 1% above the previous close
+            stop_price = self.data.Low[-1] * 1.01
+            # Create a stop_loss price for the order at 5% below the previous close
+            stop_loss = self.data.Close[-1] * 0.9
+            self.buy(sl=stop_loss, limit=stop_price, volume=0.01)
+        elif order_type == "SELL":
+            # Create a stop price for the order at 1% below the previous close
+            stop_price = self.data.Close[-1] * 0.99
+            # Create a stop_loss price for the order at 5% above the previous close
+            stop_loss = self.data.Low[-1] * 1.1
+            self.sell(sl=stop_loss, limit=stop_price)

@@ -84,46 +84,4 @@ if __name__ == '__main__':
         cross_events = strat[strat["crossover"] == True]
         print(cross_events)
         # Set the parameters
-        """
-        params = {"n1": range(10, 15, 1), "n2": range(50, 70, 1)}
-        data = mt5_lib.query_historic_data(
-            symbol="ETHUSD.a",
-            timeframe="H1",
-            number_of_candles=1000
-        )
-        results = backtest_lib.run_backtest(
-            data=data,
-            strategy="EMACross",
-            cash=10000,
-            commission=0.002,
-            symbol="ETHUSD.a",
-            timeframe="H1",
-            exchange="mt5",
-            params=params
-        )
-        print(results)
-        
-        # Get the candles
-        results = backtest_lib.multi_optimize(
-            strategy="EMACross",
-            cash=10000,
-            commission=0.002,
-            symbols=["ETHUSD.a"],
-            timeframes=["H1"],
-            exchange="mt5",
-            time_to_test="3Months",
-            params=params
-        )
-       
-        results = backtest_lib.multi_optimize(
-            strategy="EMACross",
-            cash=10000,
-            commission=0.002,
-            symbols=["ETHUSD.a", "XRPUSD.a"],
-            timeframes=["M1", "M2", "M3", "M5", "H1", "H2", "H3", "H4", "H6", "H8", "H12", "D1"],
-            exchange="mt5"
-        )
-        print("Completed")
-        pef_end = time.perf_counter()
-        print(f"Total time: {pef_end - perf_start}")
-        """
+

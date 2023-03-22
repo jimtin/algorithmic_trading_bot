@@ -89,6 +89,30 @@ def calc_crossover(dataframe, column_one, column_two):
     return dataframe
 
 
+# Function to calculate a zero cross event
+def calc_zero_cross(dataframe, column):
+    """
+    Function to calculate a zero cross event
+    :param dataframe: Panda's Dataframe object
+    :param column: string of the column name of the column to be checked
+    :return: dataframe with cross events
+    """
+    # Create a position column
+    dataframe['position'] = dataframe[column] > 0
+    # Create a pre-position column which is the previous row shifted by 1
+    dataframe['pre_position'] = dataframe['position'].shift(1)
+    # Drop any NA values
+    dataframe.dropna(inplace=True)
+    # Define Crossover events
+    dataframe['zero_cross'] = np.where(dataframe['position'] == dataframe['pre_position'], False, True)
+    # Remove the 'position' column
+    dataframe = dataframe.drop(columns='position')
+    # Remove the 'pre_position' column
+    dataframe = dataframe.drop(columns='pre_position')
+    # Return dataframe
+    return dataframe
+
+
 # Function to calculate EMA using ta-lib
 def calc_ema_ta(dataframe, ema_size, display=False, symbol=None, fig=None):
     """
@@ -138,6 +162,31 @@ def calc_macd(dataframe, macd_fast=12, macd_slow=26, macd_signal=9, display=Fals
     if display:
         title = symbol + " MACD Indicator"
         fig = display_lib.display_macd_indicator(
+            dataframe=dataframe,
+            title=title
+        )
+        # Return the dataframe
+        return fig
+    else:
+        # If not displaying, return the dataframe
+        return dataframe
+
+
+# Function to calculate the RSI indicator
+def calc_rsi(dataframe, rsi_size=14, display=False, symbol=None):
+    """
+    Function to calculate the RSI indicator. Default period is 14.
+    :param dataframe: dataframe object of security to have RSI applied to
+    :param rsi_size: size of the RSI oscillation. Default 14.
+    :param display: boolean to determine whether the RSI indicator should be displayed
+    :param symbol: string. Used for display
+    :return: dataframe with RSI values included or figure
+    """
+    # Calculate the RSI values in the dataframe
+    dataframe['rsi'] = talib.RSI(dataframe['close'], timeperiod=rsi_size)
+    if display:
+        title = symbol + " RSI Indicator"
+        fig = display_lib.display_rsi_indicator(
             dataframe=dataframe,
             title=title
         )

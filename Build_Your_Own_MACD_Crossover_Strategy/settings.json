@@ -1,0 +1,10 @@
+{
+    "mt5": {
+        "username": "51113813",
+        "password": "2hG8Tdw4",
+        "server": "ICMarkets-Demo",
+        "mt5_pathway": "C:/Program Files/ICMarkets - MetaTrader 5/terminal64.exe",
+        "symbols": ["USDJPY.a"],
+        "timeframe": "M1"
+    }
+}

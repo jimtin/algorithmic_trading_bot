@@ -5,13 +5,10 @@ import pandas
 
 import time
 
-import display_lib
+import backtest_lib
 import indicator_lib
 import mt5_lib
-import macd_crossover_strategy
-import ema_cross_strategy
-import make_trade
-import backtest_lib
+from strategies import macd_crossover_strategy
 
 # Location of settings.json
 settings_filepath = "../tutorial/settings.json" # <- This can be modified to be your own settings filepath
@@ -74,14 +71,30 @@ if __name__ == '__main__':
     perf_start = time.perf_counter()
     # If MT5 starts correctly, lets query for some candles
     if mt5_start:
-        strat = macd_crossover_strategy.macd_crossover_strategy(
-            symbol="ETHUSD.a",
-            timeframe="H1",
-            exchange="mt5",
+        # Backtest values
+        symbol = "ETHUSD"
+        timeframe = "D1"
+        time_to_test = "1Year"
+        # Calculate the MACD Crossover Strategy
+        data = macd_crossover_strategy.macd_crossover_strategy(
+            symbol=symbol,
+            timeframe=timeframe,
+            time_to_test=time_to_test,
+            time_to_cancel="num_minutes=60"
         )
-        print(strat)
-        # Extract only true crossover signals
-        cross_events = strat[strat["crossover"] == True]
-        print(cross_events)
-        # Set the parameters
+        # Fire off the forex backtest
+        backtest_results = backtest_lib.forex_backtest(
+            strategy_dataframe=data,
+            cash=100000,
+            commission=0.002,
+            symbol=symbol,
+            exchange="mt5",
+            time_to_test=time_to_test,
+            risk_percent=0.01,
+            candle_timeframe=timeframe
+        )
+    perf_stop = time.perf_counter()
+    print(f"Total time to run: {perf_stop - perf_start}")
+
+
 

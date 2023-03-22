@@ -214,6 +214,40 @@ def display_macd_indicator(dataframe, title):
     return fig
 
 
+# Function to display a RSI indicator
+def display_rsi_indicator(dataframe, title):
+    """
+    Function to display a RSI indicator
+    :param dataframe: dataframe with price data and rsi
+    :param title: Symbol for title
+    :return: figure with all data
+    """
+    # Set up the figure
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # Add in the candlesticks for the original data
+    fig = fig.add_trace(
+        go.Candlestick(
+            x=dataframe['human_time'],
+            open=dataframe['open'],
+            high=dataframe['high'],
+            close=dataframe['close'],
+            low=dataframe['low'],
+            name=title
+        ),
+        secondary_y=False
+    )
+    # Add in the RSI line
+    fig = fig.add_trace(
+        go.Scatter(
+            x=dataframe['human_time'],
+            y=dataframe['rsi'],
+            name="RSI"
+        ),
+        secondary_y=True
+    )
+    return fig
+
+
 # Function to add a line trace to a plot
 def add_line_to_graph(base_fig, dataframe, dataframe_column, line_name):
     """
@@ -256,7 +290,7 @@ def add_markers_to_graph(base_fig, dataframe, value_column, point_names):
 
 
 # Function to turn a dataframe into a table
-def add_dataframe(dataframe):
+def add_proposed_trades_to_graph(dataframe):
     fig = go.Figure(data=[go.Table(
             header=dict(values=["Time", "Order Type", "Stop Price", "Stop Loss", "Take Profit"], align='left'),
             cells=dict(values=[
@@ -299,5 +333,65 @@ def add_trades_to_graph(trades_dict, base_fig):
     return base_fig
 
 
-# Function to add a table of the strategy outcomes to Plotly
+# Function to add display backtest outcomes
+def display_backtest_results(raw_candles, strategy_dataframe, symbol, timeframe, indicator_columns=[]):
+
+    # Create a plotly figure with four subplots
+    fig = make_subplots(
+        specs=[[{"secondary_y": True}]]
+    )
+    # Row 1: Candlestick chart with proposed trades overlaid
+    # Add in the candlesticks for the original data
+    fig = fig.add_trace(
+        go.Candlestick(
+            x=raw_candles['human_time'],
+            open=raw_candles['open'],
+            high=raw_candles['high'],
+            close=raw_candles['close'],
+            low=raw_candles['low'],
+            name="Raw Candlestick Data"
+        ),
+        row=1,
+        col=1
+    )
+    # Add in the proposed stop prices
+    fig = fig.add_trace(
+        go.Scatter(
+            mode="markers",
+            marker=dict(size=8, symbol="diamond"),
+            x=strategy_dataframe['human_time'],
+            y=strategy_dataframe['stop_price'],
+            name="Proposed Stop Price"
+        ),
+        row=1,
+        col=1
+    )
+    # Add in the proposed stop losses
+    fig = fig.add_trace(
+        go.Scatter(
+            mode="markers",
+            marker=dict(size=8, symbol="diamond"),
+            x=strategy_dataframe['human_time'],
+            y=strategy_dataframe['stop_loss'],
+            name="Proposed Stop Loss"
+        ),
+        row=1,
+        col=1
+    )
+    # Add in the proposed take profits
+    fig = fig.add_trace(
+        go.Scatter(
+            mode="markers",
+            marker=dict(size=8, symbol="diamond"),
+            x=strategy_dataframe['human_time'],
+            y=strategy_dataframe['take_profit'],
+            name="Proposed Take Profit"
+        ),
+        row=1,
+        col=1
+    )
+
+    # Display the graph
+    display_graph(fig, "Backtest X", dash=True)
+
 

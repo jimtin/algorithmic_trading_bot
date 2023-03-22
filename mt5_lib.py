@@ -447,3 +447,27 @@ def get_exchange_rate(symbol):
     symbol_info = MetaTrader5.symbol_info(symbol)
     # Return the exchange rate
     return symbol_info.bid
+
+
+# Function to query historic candlestick data from MT5
+def get_candlesticks(symbol, timeframe, number_of_candles):
+    """
+    Function to retrieve a user-defined number of candles from MetaTrader 5. Initial upper range set to
+    50,000 as more requires changes to MetaTrader 5 defaults.
+    :param symbol: string of the symbol being retrieved
+    :param timeframe: string of the timeframe being retrieved
+    :param number_of_candles: integer of number of candles to retrieve. Limited to 50,000
+    :return: dataframe of the candlesticks
+    """
+    # Check that the number of candles is <= 50,000
+    if number_of_candles > 50000:
+        raise ValueError("No more than 50000 candles can be retrieved at this time")
+    # Convert the timeframe into MT5 friendly format
+    mt5_timeframe = set_query_timeframe(timeframe=timeframe)
+    # Retrieve the data
+    candles = MetaTrader5.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
+    # Convert to a dataframe
+    dataframe = pandas.DataFrame(candles)
+    # Add a 'Human Time' column
+    dataframe['human_time'] = pandas.to_datetime(dataframe['time'], unit='s')
+    return dataframe

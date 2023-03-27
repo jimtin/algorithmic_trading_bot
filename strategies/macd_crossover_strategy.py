@@ -9,7 +9,8 @@ import pandas
 
 
 # Main MACD Crossover Strategy Function
-def macd_crossover_strategy(symbol, timeframe, time_to_test, time_to_cancel, macd_fast=12, macd_slow=26, macd_signal=9, exchange="mt5"):
+def macd_crossover_strategy(time_to_test, time_to_cancel, macd_fast=12, macd_slow=26, macd_signal=9, exchange="mt5",
+                            symbol="", timeframe="", dataframe=None, stop_loss_multiplier=1, take_profit_multiplier=1):
     """
     Main MACD Crossover Strategy Function
     :param symbol: symbol to be analyzed
@@ -27,27 +28,47 @@ def macd_crossover_strategy(symbol, timeframe, time_to_test, time_to_cancel, mac
     # 3. Determine trades -> det_trade()
     # 4. Make trade -> make_trade()
 
+    # raise an error if the dataframe is None, and symbol or timeframe are empty
+    if dataframe is None and (symbol == "" or timeframe == ""):
+        raise ValueError("No data to analyze")
+    # Pass if the fast EMA is larger than the slow EMA
+    if macd_fast > macd_slow:
+        return False
+
     # Step 1: Retrieve data
-    # Check that the time to test is valid
-    if time_to_test not in ["1Month", "3Months", "6Months", "1Year", "2Years", "3Years", "5Years", "All"]:
-        raise ValueError("Chosen time_to_test range not supported")
-    data = get_data(
-        symbol=symbol,
-        timeframe=timeframe,
-        exchange=exchange,
-        time_to_test=time_to_test
-    )
+    if dataframe is None:
+        # Check that the time to test is valid
+        if time_to_test not in ["1Month", "3Months", "6Months", "1Year", "2Years", "3Years", "5Years", "All"]:
+            raise ValueError("Chosen time_to_test range not supported")
+        data = get_data(
+            symbol=symbol,
+            timeframe=timeframe,
+            exchange=exchange,
+            time_to_test=time_to_test
+        )
+    else:
+        data = dataframe
     # Step 2: Pass data to calculate indicators
+    # Return False if the dataframe is empty
+    if len(data) == 0:
+        return False
     data = calc_indicators(
         dataframe=data,
         macd_fast=macd_fast,
         macd_slow=macd_slow,
         macd_signal=macd_signal
     )
+    # If data is False, return False
+    if data is False:
+        return False
     # Step 3: Calculate trade events
     data = calc_signal(
-        dataframe=data
+        dataframe=data,
+        take_profit_multiplier=take_profit_multiplier,
+        stop_loss_multiplier=stop_loss_multiplier
     )
+    if data is False:
+        return False
     # Extract only the true values from the dataframe
     data = data[data["crossover"] == True]
     # Step 4: Update Dataframe with a column for trade cancellation
@@ -61,13 +82,6 @@ def macd_crossover_strategy(symbol, timeframe, time_to_test, time_to_cancel, mac
         # Set the cancel_time to the human_time from the next row
         data["cancel_time"] = data["human_time"].shift(-1)
     else:
-        # Split time_to_cancel base on '='
-        time_to_cancel = time_to_cancel.split("=")
-        # Extract the last value
-        time_to_cancel = time_to_cancel[-1]
-        # Test that this is an integer, or raise an error
-        if not time_to_cancel.isdigit():
-            raise ValueError("time_to_cancel must be an integer")
         # Convert to integer
         time_to_cancel = int(time_to_cancel)
         # Add this to the 'human_time' column of the dataframe to get the cancel time
@@ -127,7 +141,7 @@ def calc_indicators(dataframe, macd_fast=12, macd_slow=26, macd_signal=9):
 
 
 # Function to calculate trade signals
-def calc_signal(dataframe):
+def calc_signal(dataframe, take_profit_multiplier=1, stop_loss_multiplier=1):
     """
     Function to calculate trade signals
     :param dataframe: dataframe of data to be analyzed
@@ -138,6 +152,8 @@ def calc_signal(dataframe):
     dataframe['stop_price'] = 0
     dataframe['stop_loss'] = 0
     dataframe['take_profit'] = 0
+    if len(dataframe) == 0:
+        return False
     # Get the initial index value
     start_index = dataframe.index[0]
     # Iterate through dataframe. If 'crossover' column is true, determine which direction the cross occurred
@@ -167,6 +183,10 @@ def calc_signal(dataframe):
                 # Set take profit to the distance between the stop price and stop loss added to stop price
                 distance = stop_price - stop_loss # <- Change this to change your take profit distance
                 take_profit = stop_price + distance
+                # Multiply stop loss by stop loss multiplier
+                stop_loss = stop_loss * stop_loss_multiplier
+                # Multiply take profit by take profit multiplier
+                take_profit = take_profit * take_profit_multiplier
             elif signal == -1:
                 # Set order type to sell
                 order_type = "SELL_STOP"
@@ -177,6 +197,10 @@ def calc_signal(dataframe):
                 # Set take profit to the distance between the stop price and stop loss added to stop price
                 distance = stop_loss - stop_price # <- Change this to change your take profit distance
                 take_profit = stop_price - distance
+                # Multiply stop loss by stop loss multiplier
+                stop_loss = stop_loss * stop_loss_multiplier
+                # Multiply take profit by take profit multiplier
+                take_profit = take_profit * take_profit_multiplier
             else:
                 # Set order type to None
                 order_type = None

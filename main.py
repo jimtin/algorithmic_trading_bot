@@ -72,27 +72,37 @@ if __name__ == '__main__':
     # If MT5 starts correctly, lets query for some candles
     if mt5_start:
         # Backtest values
-        symbol = "ETHUSD"
-        timeframe = "D1"
+        symbols = ["ETHUSD.a"]
+        timeframes = ["H6"]
         time_to_test = "1Year"
-        # Calculate the MACD Crossover Strategy
-        data = macd_crossover_strategy.macd_crossover_strategy(
-            symbol=symbol,
-            timeframe=timeframe,
-            time_to_test=time_to_test,
-            time_to_cancel="num_minutes=60"
-        )
-        # Fire off the forex backtest
+        # Set the params
+        # MACD Params: take_profit, stop_loss, fast_ema, slow_ema, signal_ema, time_to_cancel
+        strategy_params = [
+            [1], [1], list(range(5, 6)), [26], [9], [16]
+        ]
+        # Backets
         backtest_results = backtest_lib.forex_backtest(
-            strategy_dataframe=data,
-            cash=100000,
+            strategy="MACD_Crossover",
+            cash=10000,
             commission=0.002,
-            symbol=symbol,
+            symbols=symbols,
+            timeframes=timeframes,
+            risk_percent=0.01,
             exchange="mt5",
             time_to_test=time_to_test,
-            risk_percent=0.01,
-            candle_timeframe=timeframe
+            strategy_params=strategy_params,
+            optimize_params=True,
+            optimize_stop_loss=False,
+            optimize_take_profit=False,
+            optimize_order_cancel_time=False,
+            display_results=True,
+            trailing_stop_pips=100,
+            #trailing_take_profit_pips=1000,
         )
+        # Convert the backtest results to a dataframe
+        backtest_results = pandas.DataFrame(backtest_results)
+        # Output the results to JSON
+        backtest_results.to_json(f"backtest_results_{comment}.json")
     perf_stop = time.perf_counter()
     print(f"Total time to run: {perf_stop - perf_start}")
 

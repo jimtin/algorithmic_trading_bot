@@ -39,12 +39,7 @@ def display_graph(plotly_fig, graph_title, dash=False):
 
 
 # Function to display a backtest
-def display_backtest(original_strategy, strategy_with_trades, table, graph_title):
-    original_strategy.update_layout(
-        autosize=True
-    )
-    original_strategy.update_yaxes(automargin=True)
-    original_strategy.update_layout(xaxis_rangeslider_visible=False)
+def display_backtest(proposed_trades, completed_trades, indicators=[], graph_title="Backtest"):
     # Create a Dash Object
     app = Dash(__name__)
 
@@ -56,16 +51,16 @@ def display_backtest(original_strategy, strategy_with_trades, table, graph_title
             html.Div(children='''Original Strategy'''),
             dcc.Graph(
                 id="strat_with_trades",
-                figure=strategy_with_trades,
+                figure=completed_trades,
                 style={'height': '100vh'}
             )
         ]),
         html.Div([
-            html.H1(children="Table of Trades"),
+            html.H1(children="Strategy With Proposed Trades"),
             html.Div(children='''Original Strategy'''),
             dcc.Graph(
                 id="table_trades",
-                figure=table
+                figure=proposed_trades
             )
         ])
     ])
@@ -306,92 +301,118 @@ def add_proposed_trades_to_graph(dataframe):
 
 
 # Function to add trades to graph
-def add_trades_to_graph(trades_dict, base_fig):
+def add_trades_to_graph(proposed_trades_dataframe, base_fig):
     # Create a point plot list
     point_plot = []
     # Create the colors
-    buy_color = dict(color="green")
-    sell_color = dict(color="red")
+    buy_color = "green"
+    sell_color = "red"
     # Add each set of trades
-    trades = trades_dict["full_trades"]
-    for trade in trades:
-        if trade['trade_outcome']['not_completed'] is False:
-            if trade['trade_type'] == "BUY_STOP":
-                color = buy_color
-            else:
-                color = sell_color
-
-            base_fig.add_trace(
-                go.Scatter(
-                    x=[trade['order_time'], trade['open_time'], trade['close_time']],
-                    y=[trade['order_price'], trade['open_price'], trade['close_price']],
-                    name=trade['name'],
-                    legendgroup=trade['trade_type'],
-                    line=color
-                )
+    for index, row in proposed_trades_dataframe.iterrows():
+        # Set the colour
+        if row['order_type'] == "BUY_STOP":
+            color = buy_color
+        else:
+            color = sell_color
+        # Add in the stop loss and take profit
+        base_fig.add_shape(
+            x0=row['human_time'],
+            x1=row['cancel_time'],
+            y0=row['stop_loss'],
+            y1=row['take_profit'],
+            line=dict(
+                color=color,
+            ),
+            fillcolor=color,
+            opacity=0.2
+        )
+        # Add in the stop price
+        base_fig.add_shape(
+            type="line",
+            x0=row['human_time'],
+            x1=row['human_time'],
+            y0=row['stop_price'],
+            line=dict(
+                color=color,
+                width=2
             )
+        )
     return base_fig
 
 
+# Function to add proposed trades to graph
+def proposed_trades_graph(raw_candlesticks, proposed_trades):
+    # Plot the underlying candlesticks
+    fig = construct_base_candlestick_graph(raw_candlesticks, "Proposed Trades")
+    # Overlay the trades
+    fig = add_trades_to_graph(proposed_trades, fig)
+    # Return the figure
+    return fig
+
+
 # Function to add display backtest outcomes
-def display_backtest_results(raw_candles, strategy_dataframe, symbol, timeframe, indicator_columns=[]):
+def completed_trades(raw_candles, backtest_results):
+    # Construct the base trade results
+    fig = construct_base_candlestick_graph(raw_candles, "Completed Trades")
+    # Add in layout features for each plotly figure
+    fig.update_layout(
+        xaxis_rangeslider_visible=False,
+        autosize=True,
+    )
+    fig.update_yaxes(automargin=True)
+    # Extract the winning Trades
+    winning_trades = backtest_results['win_objects']
+    # Iterate through each winning trade and add it to the plot
+    for index, trade in enumerate(winning_trades):
+        if index == 0:
+            fig = fig.add_trace(
+                go.Scatter(
+                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
+                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    name="Winning Trades",
+                    legendgroup="winning_trades",
+                    line=dict(color="blue")
+                )
+            )
+        else:
+            fig = fig.add_trace(
+                go.Scatter(
+                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
+                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    name="Winning Trades",
+                    legendgroup="winning_trades",
+                    line=dict(color="blue"),
+                    showlegend=False
+                )
+            )
+    # Extract the losing Trades
+    losing_trades = backtest_results['loss_objects']
+    # Iterate through each losing trade and add it to the plot
+    for index, trade in enumerate(losing_trades):
+        if index == 0:
+            fig = fig.add_trace(
+                go.Scatter(
+                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
+                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    name="Losing Trades",
+                    legendgroup="losing_trades",
+                    line=dict(color="red")
+                )
+            )
+        else:
+            fig = fig.add_trace(
+                go.Scatter(
+                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
+                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    name="Losing Trades",
+                    legendgroup="losing_trades",
+                    line=dict(color="red"),
+                    showlegend=False
+                )
+            )
+    # Return the figure
+    return fig
 
-    # Create a plotly figure with four subplots
-    fig = make_subplots(
-        specs=[[{"secondary_y": True}]]
-    )
-    # Row 1: Candlestick chart with proposed trades overlaid
-    # Add in the candlesticks for the original data
-    fig = fig.add_trace(
-        go.Candlestick(
-            x=raw_candles['human_time'],
-            open=raw_candles['open'],
-            high=raw_candles['high'],
-            close=raw_candles['close'],
-            low=raw_candles['low'],
-            name="Raw Candlestick Data"
-        ),
-        row=1,
-        col=1
-    )
-    # Add in the proposed stop prices
-    fig = fig.add_trace(
-        go.Scatter(
-            mode="markers",
-            marker=dict(size=8, symbol="diamond"),
-            x=strategy_dataframe['human_time'],
-            y=strategy_dataframe['stop_price'],
-            name="Proposed Stop Price"
-        ),
-        row=1,
-        col=1
-    )
-    # Add in the proposed stop losses
-    fig = fig.add_trace(
-        go.Scatter(
-            mode="markers",
-            marker=dict(size=8, symbol="diamond"),
-            x=strategy_dataframe['human_time'],
-            y=strategy_dataframe['stop_loss'],
-            name="Proposed Stop Loss"
-        ),
-        row=1,
-        col=1
-    )
-    # Add in the proposed take profits
-    fig = fig.add_trace(
-        go.Scatter(
-            mode="markers",
-            marker=dict(size=8, symbol="diamond"),
-            x=strategy_dataframe['human_time'],
-            y=strategy_dataframe['take_profit'],
-            name="Proposed Take Profit"
-        ),
-        row=1,
-        col=1
-    )
 
-    # Display the graph
-    display_graph(fig, "Backtest X", dash=True)
 
 

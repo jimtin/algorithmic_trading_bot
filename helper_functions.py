@@ -2,7 +2,7 @@ import mt5_lib
 
 
 # Function to calculate FOREX lot size on MT5
-def calc_lot_size(balance, risk_amount, stop_loss, stop_price, symbol, exchange="mt5", my_currency="USD"):
+def calc_lot_size(balance, risk_amount, stop_loss, stop_price, symbol, exchange="mt5", my_currency="USD", pip_size=None, base_currency=None):
     """
     Function to calculate a lot size (or volume) for a FOREX trade on MT5. The balance is passed as a static amount,
     any compounding is taken care of in the parent function.
@@ -28,12 +28,17 @@ def calc_lot_size(balance, risk_amount, stop_loss, stop_price, symbol, exchange=
     # Calculate the amount to risk
     amount_to_risk = balance * risk_amount
 
+    # Raise an error if pip_size is not None and base_currency is None
+    if pip_size is not None and base_currency is None:
+        raise ValueError("If pip_size is not None, base_currency must also be specified")
+
     # Get the pip size
-    if exchange == "mt5":
-        pip_size = mt5_lib.get_pip_size(symbol=symbol)
-        base_currency = mt5_lib.get_base_currency(symbol=symbol)
-    else:
-        raise ValueError("Exchange not supported")
+    if pip_size is None:
+        if exchange == "mt5":
+            pip_size = mt5_lib.get_pip_size(symbol=symbol)
+            base_currency = mt5_lib.get_base_currency(symbol=symbol)
+        else:
+            raise ValueError("Exchange not supported")
     # Branch based on profit currency
     if base_currency == "USD":
         # Calculate the amount of pips being risked

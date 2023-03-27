@@ -471,3 +471,16 @@ def get_candlesticks(symbol, timeframe, number_of_candles):
     # Add a 'Human Time' column
     dataframe['human_time'] = pandas.to_datetime(dataframe['time'], unit='s')
     return dataframe
+
+
+# Get the contract size for a symbol
+def get_contract_size(symbol):
+    """
+    Function to retrieve the contract size of a symbol from MetaTrader 5
+    :param symbol: string of the symbol to be queried
+    :return: float of the contract size
+    """
+    # Get the symbol information
+    symbol_info = MetaTrader5.symbol_info(symbol)
+    # Return the contract size
+    return symbol_info.trade_contract_size

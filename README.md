@@ -33,6 +33,10 @@ to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 9. [How to Calculate Lot Size for Your MetaTrader 5 Python Trading Bot](https://youtu.be/fveyPFreenk)
 10. [How to Create Orders with Your MetaTrader Python Trading Bot](https://youtu.be/fveyPFreenk)
 11. [How to Create Orders with Your MetaTrader 5 Python Trading Bot Pt 2](https://youtu.be/nn8XQgFN5W8)
+12. [Advanced Order Management with MetaTrader 5 Python Trading Bot](https://youtu.be/cWfBrDQj_5s)
+13. [Never Miss a CandleStick with Your MetaTrader 5 Python Trading Bot](https://youtu.be/ecK0ZbMWVIA)
+14. [Manage Every Trade with Your MetaTrader 5 Python Trading Bot](https://youtu.be/Q5GQFxk1IJI)
+15. [Multi-Strategy Trading Accounts with MetaTrader 5 Python Trading Bot](https://youtu.be/4NDO81n-EpA)
 
 ### Blog Articles
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 

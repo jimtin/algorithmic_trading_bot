@@ -42,17 +42,17 @@ to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 1. [How to Install TALib on Windows](https://youtu.be/jnxqu9MhBIE)
 2. [All About the MACD: Moving Average Convergence/Divergence](https://youtu.be/U33hGglLo2M)
 3. [Build Your Own MACD Indicatr with MetaTrader 5 and Python](https://youtu.be/AbXY0QtAIp4)
+4. [Build Your Own MACD Crossover Strategy with MetaTrader 5 and Python](https://youtu.be/3awJkVasQvs)
+5. [Build Your Own MACD Zero Cross Strategy with MetaTrader 5 and Python](https://youtu.be/vEmidWrH9aA)
 
 ### Blog Articles
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 
 check out these articles:
-- [Build Your Own AutoTrading Bot](https://www.algoquant.trade/post/build-your-own-autotrading-bot)
-- [From Trading Idea to Automated Strategy: Your How To Guide](https://www.algoquant.trade/post/from-trading-idea-to-automated-strategy-your-how-to-guide)
-- [Never Miss a Trade Again with an AutoTrading Bot](https://www.algoquant.trade/post/never-miss-a-trade-again-with-an-auto-trading-bot)
 
 #### Technical Indicators
 1. [MACD Indicator Explained, with Examples, Strategies, Limitations, and a little bit of Code](https://medium.com/trading-data-analysis/macd-indicator-explained-with-examples-strategies-limitations-and-a-little-bit-of-code-38d0188f80b9)
 2. [How to Add the MACD Indicator to Your MetaTrader 5 Python Trading Bot](https://medium.com/@appnologyjames/how-to-add-the-macd-indicator-to-your-metatrader-5-python-trading-bot-1443845c41e4)
 3. [Make Your Own MACD Crossover Strategy with MetaTrader 5 and Python](https://medium.com/@appnologyjames/make-your-own-macd-crossover-strategy-with-metatrader-5-and-python-98daa630261)
 4. [Build Your Own MACD Zero Cross Strategy using MetaTrader and Python](https://medium.com/@appnologyjames/build-your-own-macd-zero-cross-strategy-using-metatrader-and-python-ba1c67b0d8ba)
+5. [Relative Strength Index (RSI) Indictor Explained, with Examples, Strategies and a little bit of Code](https://medium.com/@appnologyjames/relative-strength-index-rsi-indicator-explained-with-examples-strategies-and-a-little-bit-of-d2973a74198a)
 

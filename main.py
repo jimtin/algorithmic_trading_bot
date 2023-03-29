@@ -6,6 +6,7 @@ import pandas
 import time
 
 import backtest_lib
+import display_lib
 import indicator_lib
 import mt5_lib
 from strategies import macd_crossover_strategy
@@ -71,6 +72,17 @@ if __name__ == '__main__':
     perf_start = time.perf_counter()
     # If MT5 starts correctly, lets query for some candles
     if mt5_start:
+        """
+        # Get the data
+        data = mt5_lib.get_candlesticks(
+            symbol="ETHUSD.a",
+            timeframe="H6",
+            number_of_candles=1000,
+        )
+        # Create the indicators
+        rsi = indicator_lib.calc_rsi(dataframe=data, rsi_size=14, display=True, symbol="ETHUSD.a")
+        display_lib.display_graph(rsi, "ETHUSD Price Chart", dash=True)
+        """
         # Backtest values
         symbols = ["ETHUSD.a"]
         timeframes = ["H6"]
@@ -96,13 +108,14 @@ if __name__ == '__main__':
             optimize_take_profit=False,
             optimize_order_cancel_time=False,
             display_results=True,
-            trailing_stop_pips=100,
-            #trailing_take_profit_pips=1000,
+            trailing_stop_pips=900,
+            trailing_take_profit_pips=900
         )
         # Convert the backtest results to a dataframe
         backtest_results = pandas.DataFrame(backtest_results)
         # Output the results to JSON
         backtest_results.to_json(f"backtest_results_{comment}.json")
+
     perf_stop = time.perf_counter()
     print(f"Total time to run: {perf_stop - perf_start}")
 

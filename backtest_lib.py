@@ -321,10 +321,9 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
     current_balance = cash
     # Iterate through historic_data_dict and test each row against the strategy
     for historic_row in historic_data_dict:
-        # # Step 1: Check the trades list to see if any trades have hit their stop loss or take profit
+        # Step 1: Check trades for any updates
         for trade in trades:
-            current_time = historic_row['time']
-            # Step 1.3: Check to see if any trailing stops need to be updated
+            # Step 1.1: Check to see if any trailing stops need to be updated
             new_stop_loss = check_trailing_stops(
                 historic_row=historic_row,
                 trade_row=trade,
@@ -334,11 +333,12 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                 trailing_stop_percent=trailing_stop_percent,
                 pip_size=pip_size
             )
+            # If a new stop loss is returned, update the trade
             if new_stop_loss:
-
                 # Create a dictionary to store the update
                 update = {
                     'time': historic_row['time'],
+                    'human_time': historic_row['human_time'],
                     'new_stop_loss': new_stop_loss,
                     'previous_stop_loss': trade['stop_loss'],
                     'historic_row': historic_row
@@ -347,7 +347,7 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                 trade['trailing_stop_update'].append(update)
                 # Update the trade dictionary with the new stop loss
                 trade['stop_loss'] = new_stop_loss
-            # Step 1.4: Check to see if any trailing take profits need to be updated
+            # Step 1.2: Check to see if any trailing take profits need to be updated
             new_take_profit = check_trailing_take_profits(
                 historic_row=historic_row,
                 trade_row=trade,
@@ -361,6 +361,7 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                 # Create a dictionary to store the update
                 update = {
                     'time': historic_row['time'],
+                    'human_time': historic_row['human_time'],
                     'new_take_profit': new_take_profit,
                     'previous_take_profit': trade['take_profit'],
                     'historic_row': historic_row
@@ -369,13 +370,14 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                 trade['trailing_take_profit_update'].append(update)
                 # Update the trade dictionary with the new take profit
                 trade['take_profit'] = new_take_profit
-            # Step 1.1: Check for stop loss
+            # Step 1.3: Check to see if any stop losses have been reached
             stop_loss_reached = test_for_stop_loss(historic_row, trade)
             # If Stop Loss reached, update
             if stop_loss_reached:
                 # Update the trade dictionary with 'trade_close_details' as the current historic row
                 trade['trade_close_details'] = historic_row
                 trade['closing_price'] = trade['stop_loss']
+                trade['closing_time'] = historic_row['human_time']
                 profit = calculate_profit(trade, "stop_loss", contract_size)
                 if profit > 0:
                     trade['trade_win'] = True
@@ -386,13 +388,14 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                 completed_trades.append(trade)
                 # Remove from trades list
                 trades.remove(trade)
-            # Step 1.2: Check for take profit
+            # Step 1.4: Check to see if Take Profit has been reached
             take_profit_reached = test_for_take_profit(historic_row, trade)
             # If Take Profit reached, update
             if take_profit_reached:
                 # Update the trade dictionary with 'trade_close_details' as the current historic row
                 trade['trade_close_details'] = historic_row
                 trade['closing_price'] = trade['take_profit']
+                trade['closing_time'] = historic_row['human_time']
                 # Calculate the profit
                 profit = calculate_profit(trade, "take_profit", contract_size)
                 if profit > 0:
@@ -437,6 +440,11 @@ def forex_backtest_run(strategy_dataframe, raw_strategy_candlesticks, cash, comm
                         )
                         # Add the lot_size to the strategy_row
                         strategy_row['lot_size'] = lot_size
+                        # Add in the original stop_loss and take_profit
+                        strategy_row['original_stop_loss'] = strategy_row['stop_loss']
+                        strategy_row['original_take_profit'] = strategy_row['take_profit']
+                        # Add in the original starting time
+                        strategy_row['original_start_time'] = historic_row['human_time']
                         # Subtract the amount risked from the balance
                         current_balance -= current_balance * risk_percent
                         # Append to trades
@@ -567,32 +575,48 @@ def check_trailing_stops(historic_row, trade_row, raw_candlesticks, trailing_sto
     # Branch based on the trailing stop inputs
     # Trailing stop pips
     if trailing_stop_pips:
-        #print(f"Pip Size: {pip_size}")
         # Calculate the trailing stop size
         trailing_stop_size = trailing_stop_pips * pip_size
         # Branch based on the order type
         if trade_row['order_type'] == "BUY_STOP":
-            trailing_stop_price = historic_row['low'] + trailing_stop_size
-            # Check if the historic_row['high'] is > than the stop_loss
-            if trailing_stop_price > trade_row['stop_loss']:
-                new_stop_loss = trailing_stop_price
+            # Check if the historic_row['high'] - trade_row['stop_loss'] is > than the trailing_stop_size
+            if historic_row['high'] - trade_row['stop_loss'] > trailing_stop_size:
+                #print(f"Trailing stop update: Trade Row: {trade_row['original_start_time']}, {trade_row['stop_loss']}, "
+                #      f"Historic Row: {historic_row['human_time']}, {historic_row['high']}")
+                trailing_stop_price = historic_row['high'] - trailing_stop_size
+                # Check if the trailing stop price is > than the current historic_row['high']
+                if trailing_stop_price > historic_row['high']:
+                    # Set the trailing_stop_price to the historic_row['high']
+                    trailing_stop_price = historic_row['high']
+                    print(f"Error in trailing stop pip trail function")
+                # Check if the trailing_stop_price is > than the current stop loss
+                if trailing_stop_price > trade_row['stop_loss']:
+                    new_stop_loss = trailing_stop_price
         elif trade_row['order_type'] == "SELL_STOP":
-            trailing_stop_price = historic_row['high'] - trailing_stop_size
-            # Check if the historic_row['low'] is < than the stop_loss
-            if trailing_stop_price < trade_row['stop_loss']:
-                new_stop_loss = trailing_stop_price
+            # Check if the trade_row['stop_loss'] - historic_row['low'] is > than the trailing_stop_size
+            if trade_row['stop_loss'] - historic_row['low'] > trailing_stop_size:
+                #print(f"Trailing stop update: Trade Row: {trade_row['original_start_time']}, {trade_row['stop_loss']}, "
+                #      f"Historic Row: {historic_row['human_time']}, {historic_row['high']}")
+                trailing_stop_price = historic_row['low'] + trailing_stop_size
+                # Check if the trailing stop price is < than the current historic_row['low']
+                if trailing_stop_price < historic_row['low']:
+                    # Set the trailing_stop_price to the historic_row['low']
+                    trailing_stop_price = historic_row['low']
+                # Check if the historic_row['low'] is < than the stop_loss
+                if trailing_stop_price < trade_row['stop_loss']:
+                    new_stop_loss = trailing_stop_price
     # Trailing stop percent
     elif trailing_stop_percent:
         # Calculate the trailing stop size
         trailing_stop_size = trailing_stop_percent * trade_row['stop_price']
         # Branch based on the order type
         if trade_row['order_type'] == "BUY_STOP":
-            trailing_stop_price = historic_row['low'] + trailing_stop_size
+            trailing_stop_price = historic_row['high'] - trailing_stop_size
             # Check if the historic_row['high'] is > than the stop_loss
             if trailing_stop_price > trade_row['stop_loss']:
                 new_stop_loss = trailing_stop_price
         elif trade_row['order_type'] == "SELL_STOP":
-            trailing_stop_price = historic_row['high'] - trailing_stop_size
+            trailing_stop_price = historic_row['low'] + trailing_stop_size
             # Check if the historic_row['low'] is < than the stop_loss
             if trailing_stop_price < trade_row['stop_loss']:
                 new_stop_loss = trailing_stop_price
@@ -638,7 +662,7 @@ def check_trailing_take_profits(historic_row, trade_row, raw_candlesticks, trail
         # Branch based on the order type
         if trade_row['order_type'] == "BUY_STOP":
             trailing_take_profit_price = historic_row['high'] + trailing_take_profit_size
-            # Check if the historic_row['high'] is > than the take_profit
+            # Check if the historic_row['high'] + trailing_take_profit_size is > than the take_profit
             if trailing_take_profit_price > trade_row['take_profit']:
                 new_take_profit = trailing_take_profit_price
         elif trade_row['order_type'] == "SELL_STOP":
@@ -723,17 +747,19 @@ def calculate_backtest_results(results_dict, contract_size, parameters, raw_stra
                 "trade_id": trade_id,
                 "order_type": row['order_type'],
                 "lot_size": row['lot_size'],
-                "stop_price": row['stop_price'],
-                "take_profit": row['take_profit'],
-                "stop_loss": row['stop_loss'],
-                "starting_stop_loss": row['stop_loss'],
-                "starting_take_profit": row['take_profit'],
+                "closing_stop_price": row['stop_price'],
+                "closing_take_profit": row['take_profit'],
+                "closing_stop_loss": row['stop_loss'],
+                "starting_stop_loss": row['original_stop_loss'],
+                "starting_take_profit": row['original_take_profit'],
                 "ending_stop_loss": row['stop_loss'],
                 "ending_profit_price": row['take_profit'],
+                "closing_price": row['closing_price'],
+                "closing_time": row['closing_time'],
                 "profit": row_profit,
                 "order_open_time": row['human_time'],
-                "trade_open_time": row['trade_open_details']['human_time'],
-                "trade_close_time": row['trade_close_details']['human_time'],
+                "trade_open_time": row['original_start_time'],
+                "trade_close_time": row['closing_time'],
                 "trade_trailing_stop": row['trailing_stop_update'],
                 "trade_trailing_take_profit": row['trailing_take_profit_update']
             }
@@ -753,17 +779,19 @@ def calculate_backtest_results(results_dict, contract_size, parameters, raw_stra
                 "trade_id": trade_id,
                 "order_type": row['order_type'],
                 "lot_size": row['lot_size'],
-                "stop_price": row['stop_price'],
-                "starting_stop_loss": row['stop_loss'],
-                "starting_take_profit": row['take_profit'],
+                "closing_stop_price": row['stop_price'],
+                "closing_take_profit": row['take_profit'],
+                "closing_stop_loss": row['stop_loss'],
+                "starting_stop_loss": row['original_stop_loss'],
+                "starting_take_profit": row['original_take_profit'],
                 "ending_stop_loss": row['stop_loss'],
-                "ending_profit_price": row['stop_loss'],
-                "take_profit": row['take_profit'],
-                "stop_loss": row['stop_loss'],
+                "ending_profit_price": row['take_profit'],
+                "closing_price": row['closing_price'],
+                "closing_time": row['closing_time'],
                 "profit": row_profit,
                 "order_open_time": row['human_time'],
-                "trade_open_time": row['trade_open_details']['human_time'],
-                "trade_close_time": row['trade_close_details']['human_time'],
+                "trade_open_time": row['original_start_time'],
+                "trade_close_time": row['closing_time'],
                 "trade_trailing_stop": row['trailing_stop_update'],
                 "trade_trailing_take_profit": row['trailing_take_profit_update']
             }

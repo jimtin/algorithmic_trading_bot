@@ -367,8 +367,8 @@ def completed_trades(raw_candles, backtest_results):
         if index == 0:
             fig = fig.add_trace(
                 go.Scatter(
-                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
-                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    x=[trade['trade_open_time'], trade['closing_time']],
+                    y=[trade['closing_stop_price'], trade['closing_price']],
                     name="Winning Trades",
                     legendgroup="winning_trades",
                     line=dict(color="blue")
@@ -377,8 +377,8 @@ def completed_trades(raw_candles, backtest_results):
         else:
             fig = fig.add_trace(
                 go.Scatter(
-                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
-                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    x=[trade['trade_open_time'], trade['closing_time']],
+                    y=[trade['closing_stop_price'], trade['closing_price']],
                     name="Winning Trades",
                     legendgroup="winning_trades",
                     line=dict(color="blue"),
@@ -392,8 +392,8 @@ def completed_trades(raw_candles, backtest_results):
         if index == 0:
             fig = fig.add_trace(
                 go.Scatter(
-                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
-                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    x=[trade['trade_open_time'], trade['closing_time']],
+                    y=[trade['closing_stop_price'], trade['closing_price']],
                     name="Losing Trades",
                     legendgroup="losing_trades",
                     line=dict(color="red")
@@ -402,8 +402,8 @@ def completed_trades(raw_candles, backtest_results):
         else:
             fig = fig.add_trace(
                 go.Scatter(
-                    x=[trade['order_open_time'], trade['trade_open_time'], trade['trade_close_time']],
-                    y=[trade['stop_price'], trade['stop_price'], trade['ending_profit_price']],
+                    x=[trade['trade_open_time'], trade['closing_time']],
+                    y=[trade['closing_stop_price'], trade['closing_price']],
                     name="Losing Trades",
                     legendgroup="losing_trades",
                     line=dict(color="red"),

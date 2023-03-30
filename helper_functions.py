@@ -48,6 +48,9 @@ def calc_lot_size(balance, risk_amount, stop_loss, stop_price, symbol, exchange=
         if symbol_name == "USDJPY":
             # Calculate the raw lot_size
             raw_lot_size = pip_value / 1000
+        elif symbol_name == "ETHUSD":
+            # Calculate the raw lot_size
+            raw_lot_size = pip_value * 100
         else:
             raw_lot_size = pip_value / 10
     else:

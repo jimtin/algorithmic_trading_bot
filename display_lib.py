@@ -39,7 +39,9 @@ def display_graph(plotly_fig, graph_title, dash=False):
 
 
 # Function to display a backtest
-def display_backtest(proposed_trades, completed_trades, indicators=[], graph_title="Backtest"):
+def display_backtest(proposed_trades, completed_trades, win_objects, loss_objects, proposed_trades_table, indicators=[],
+                     graph_title="Backtest"):
+    # Todo: add callback so that trailing stops can be explored
     # Create a Dash Object
     app = Dash(__name__)
 
@@ -59,8 +61,32 @@ def display_backtest(proposed_trades, completed_trades, indicators=[], graph_tit
             html.H1(children="Strategy With Proposed Trades"),
             html.Div(children='''Original Strategy'''),
             dcc.Graph(
+                id="display_trades",
+                figure=proposed_trades
+            )
+        ]),
+        html.Div([
+            html.H1(children="Proposed Trades Table"),
+            html.Div(children='''Original Strategy'''),
+            dcc.Graph(
                 id="table_trades",
                 figure=proposed_trades
+            )
+        ]),
+        html.Div([
+            html.H1(children="Win Objects"),
+            html.Div(children='''Win Objects'''),
+            dcc.Graph(
+                id="win_objects",
+                figure=win_objects
+            )
+        ]),
+        html.Div([
+            html.H1(children="Loss Objects"),
+            html.Div(children='''Loss Objects'''),
+            dcc.Graph(
+                id="loss_objects",
+                figure=loss_objects
             )
         ])
     ])
@@ -414,5 +440,20 @@ def completed_trades(raw_candles, backtest_results):
     return fig
 
 
-
-
+# Convert a dataframe into a table
+def dataframe_to_table(dataframe, title):
+    """
+    Function to convert a dataframe into a table
+    :param dataframe: dataframe of the data to be plotted
+    :param title: string of the title of the dataframe
+    :return: figure with table
+    """
+    # Create the figure
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(dataframe.columns), align='left'),
+        cells=dict(values=[dataframe[col] for col in dataframe.columns], align='left')
+    )])
+    # Add in the title
+    fig.update_layout(title_text=title)
+    # Return the figure
+    return fig

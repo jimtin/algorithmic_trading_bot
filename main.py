@@ -109,7 +109,7 @@ if __name__ == '__main__':
             optimize_order_cancel_time=False,
             display_results=True,
             trailing_stop_pips=900,
-            trailing_take_profit_pips=900
+            optimize_trailing_stop_pips=True
         )
         # Convert the backtest results to a dataframe
         backtest_results = pandas.DataFrame(backtest_results)

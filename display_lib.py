@@ -70,7 +70,7 @@ def display_backtest(proposed_trades, completed_trades, win_objects, loss_object
             html.Div(children='''Original Strategy'''),
             dcc.Graph(
                 id="table_trades",
-                figure=proposed_trades
+                figure=proposed_trades_table
             )
         ]),
         html.Div([
@@ -331,8 +331,8 @@ def add_trades_to_graph(proposed_trades_dataframe, base_fig):
     # Create a point plot list
     point_plot = []
     # Create the colors
-    buy_color = "green"
-    sell_color = "red"
+    buy_color = "blue"
+    sell_color = "purple"
     # Add each set of trades
     for index, row in proposed_trades_dataframe.iterrows():
         # Set the colour
@@ -342,16 +342,17 @@ def add_trades_to_graph(proposed_trades_dataframe, base_fig):
             color = sell_color
         # Add in the stop loss and take profit
         base_fig.add_shape(
+            type="rect",
             x0=row['human_time'],
-            x1=row['cancel_time'],
             y0=row['stop_loss'],
+            x1=row['cancel_time'],
             y1=row['take_profit'],
             line=dict(
                 color=color,
-            ),
-            fillcolor=color,
-            opacity=0.2
+                width=2
+            )
         )
+        """
         # Add in the stop price
         base_fig.add_shape(
             type="line",
@@ -362,6 +363,11 @@ def add_trades_to_graph(proposed_trades_dataframe, base_fig):
                 color=color,
                 width=2
             )
+        )
+        """
+        base_fig.update_layout(
+            xaxis_rangeslider_visible=False,
+            autosize=True,
         )
     return base_fig
 

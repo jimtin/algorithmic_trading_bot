@@ -45,6 +45,12 @@ to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 4. [Build Your Own MACD Crossover Strategy with MetaTrader 5 and Python](https://youtu.be/3awJkVasQvs)
 5. [Build Your Own MACD Zero Cross Strategy with MetaTrader 5 and Python](https://youtu.be/vEmidWrH9aA)
 
+#### Series: Build Your Own Crypto Trading Bot with Binance and Python
+1. [How to Connect to Binance with Python](https://youtu.be/NBL-Id7vNl8)
+2. [How to Retrieve Historical Data from Binance with Python](https://youtu.be/VsDdOuNV_Ng)
+3. [How to Calculate the RSI Indicator with Python](https://youtu.be/uac7RDDxhQo)
+4. [Build Your Own RSI Strategy with Python and Binance](https://youtu.be/0lrrEHY3A2M)
+
 ### Blog Articles
 Medium articles are a great way to learn about the Algo Trading Bot and how to use it. If you're into text based tutorials, 
 check out these articles:

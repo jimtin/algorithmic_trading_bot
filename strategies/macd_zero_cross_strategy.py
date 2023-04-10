@@ -3,8 +3,8 @@
 # Part of Algorithmic Trading Bot: https://github.com/jimtin/algorithmic_trading_bot
 
 
-import mt5_lib # <- Import your connection to MetaTrader 5
 import indicator_lib # <- Import your indicator library
+import helper_functions
 
 
 # Function to define the MACD Zero Cross Strategy
@@ -20,7 +20,7 @@ def macd_zero_cross_strategy(symbol, timeframe, macd_fast=12, macd_slow=26, macd
     :return: dataframe with trade signals
     """
     # Retrieve data
-    data = get_data(
+    data = helper_functions.get_data(
         symbol=symbol,
         timeframe=timeframe,
         exchange=exchange
@@ -37,25 +37,6 @@ def macd_zero_cross_strategy(symbol, timeframe, macd_fast=12, macd_slow=26, macd
         dataframe=data
     )
     # Return outcome to user
-    return data
-
-
-# Function to retrieve data for strategy
-def get_data(symbol, timeframe, exchange="mt5"):
-    """
-    Function to retrieve data from MT5. Data is in the form of candlesticks and should be returned as a
-    dataframe
-    :param symbol: string of the symbol to be retrieved
-    :param timeframe: string of the timeframe to be queried
-    :return: dataframe
-    """
-    if exchange == "mt5":
-        # Note, this function can be expanded to retrieve data from other exchanges also.
-        data = mt5_lib.query_historic_data(symbol=symbol, timeframe=timeframe, number_of_candles=1000)
-    # Add other exchanges here if needed
-    else:
-        raise ValueError("Exchange not supported")
-    # Return dataframe
     return data
 
 

@@ -10,9 +10,10 @@ import display_lib
 import indicator_lib
 import mt5_lib
 from strategies import macd_crossover_strategy
+import binance_lib
 
 # Location of settings.json
-settings_filepath = "../tutorial/settings.json" # <- This can be modified to be your own settings filepath
+settings_filepath = "settings.json" # <- This can be modified to be your own settings filepath
 
 
 # Function to import settings from settings.json
@@ -65,59 +66,24 @@ if __name__ == '__main__':
     # Import settings.json
     project_settings = get_project_settings(import_filepath=settings_filepath)
     # Start MT5
-    mt5_start = mt5_startup(project_settings=project_settings)
+    # mt5_start = mt5_startup(project_settings=project_settings)
     pandas.set_option('display.max_columns', None)
     comment = "ema_cross_strategy"
     # Start a Performance timer
     perf_start = time.perf_counter()
-    # If MT5 starts correctly, lets query for some candles
-    if mt5_start:
-        """
-        # Get the data
-        data = mt5_lib.get_candlesticks(
-            symbol="ETHUSD.a",
-            timeframe="H6",
-            number_of_candles=1000,
-        )
-        # Create the indicators
-        rsi = indicator_lib.calc_rsi(dataframe=data, rsi_size=14, display=True, symbol="ETHUSD.a")
-        display_lib.display_graph(rsi, "ETHUSD Price Chart", dash=True)
-        """
-        # Backtest values
-        symbols = ["ETHUSD.a"]
-        timeframes = ["H6"]
-        time_to_test = "1Year"
-        # Set the params
-        # MACD Params: take_profit, stop_loss, fast_ema, slow_ema, signal_ema, time_to_cancel
-        strategy_params = [
-            [1], [1], list(range(5, 6)), [26], [9], [16]
-        ]
-        # Backets
-        backtest_results = backtest_lib.forex_backtest(
-            strategy="MACD_Crossover",
-            cash=10000,
-            commission=0.002,
-            symbols=symbols,
-            timeframes=timeframes,
-            risk_percent=0.01,
-            exchange="mt5",
-            time_to_test=time_to_test,
-            strategy_params=strategy_params,
-            optimize_params=True,
-            optimize_stop_loss=False,
-            optimize_take_profit=False,
-            optimize_order_cancel_time=False,
-            display_results=True,
-            trailing_stop_pips=900,
-            optimize_trailing_stop_pips=True
-        )
-        # Convert the backtest results to a dataframe
-        backtest_results = pandas.DataFrame(backtest_results)
-        # Output the results to JSON
-        backtest_results.to_json(f"backtest_results_{comment}.json")
+    # Try making a trade
+    trade = binance_lib.place_order(
+        order_type="BUY_STOP",
+        symbol="BTCUSDT",
+        quantity=0.008,
+        stop_loss=25000,
+        stop_price=35000,
+        take_profit=40000,
+        comment=comment,
+        project_settings=project_settings
+    )
 
-    perf_stop = time.perf_counter()
-    print(f"Total time to run: {perf_stop - perf_start}")
+
 
 
 

@@ -484,3 +484,15 @@ def get_contract_size(symbol):
     symbol_info = MetaTrader5.symbol_info(symbol)
     # Return the contract size
     return symbol_info.trade_contract_size
+
+
+# Function to get the balance from MT5
+def get_balance():
+    """
+    Function to get the balance from MetaTrader 5
+    :return: float of the balance
+    """
+    # Get the account information
+    account_info = MetaTrader5.account_info()
+    # Return the balance
+    return account_info.balance

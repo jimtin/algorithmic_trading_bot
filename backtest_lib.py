@@ -302,6 +302,12 @@ def forex_backtest(strategy, cash, commission, symbols, timeframes, time_to_test
     # Reprocess the best result to get a display dataframe
     if display_results:
         print("Generating results display")
+        # Extract the proposed trades
+        proposed_trades = best_result['proposed_trades']
+        # Turn into a dataframe
+        proposed_trades = pandas.DataFrame(proposed_trades)
+        # Write to JSON
+        proposed_trades.to_json("proposed_trades.json")
         # Output to JSON
         display_backtest_results(
             backtest_results=best_result,
@@ -525,8 +531,9 @@ def display_backtest_results(backtest_results, raw_candlesticks, strategy_candle
     win_dataframe.to_json("raw_win_dataframe_raw.json")
     # Extract the columns trade_id, order_type, lot_size, closing_stop_price, closing_price, closing_time, profit,
     # trade_trailing_stop, trade_trailing_take_profit
-    win_dataframe = win_dataframe[
-        ['trade_id', 'order_type', 'lot_size', 'closing_stop_price', 'closing_price', 'closing_time', 'profit']]
+    if len(win_dataframe) > 0:
+        win_dataframe = win_dataframe[
+            ['trade_id', 'order_type', 'lot_size', 'closing_stop_price', 'closing_price', 'closing_time', 'profit']]
     # Create a figure of the win dataframe
     win_dataframe_figure = display_lib.dataframe_to_table(win_dataframe, "Win Objects")
     # Extract the loss_objects from the backtest_results
@@ -535,16 +542,24 @@ def display_backtest_results(backtest_results, raw_candlesticks, strategy_candle
     loss_dataframe = pandas.DataFrame(loss_objects)
     # Write to json
     loss_dataframe.to_json("raw_loss_dataframe_raw.json")
-    # Extract the columns trade_id, order_type, lot_size, closing_stop_price, closing_price, closing_time, profit,
-    # trade_trailing_stop, trade_trailing_take_profit
-    loss_dataframe = loss_dataframe[
-        ['trade_id', 'order_type', 'lot_size', 'closing_stop_price', 'closing_price', 'closing_time', 'profit']]
+    if len(loss_dataframe) > 0:
+        # Extract the columns trade_id, order_type, lot_size, closing_stop_price, closing_price, closing_time, profit,
+        # trade_trailing_stop, trade_trailing_take_profit
+        loss_dataframe = loss_dataframe[
+            ['trade_id', 'order_type', 'lot_size', 'closing_stop_price', 'closing_price', 'closing_time', 'profit']]
     # Create a figure of the loss dataframe
     loss_dataframe_figure = display_lib.dataframe_to_table(loss_dataframe, "Loss Objects")
+    # Extract the human_time, open, high, low, close, order_type, original_stop_loss,
+    # original_take_profit, and stop_price from the strategy_candlesticks
+    proposed_trades = strategy_candlesticks[
+        ['human_time', 'open', 'high', 'low', 'close','order_type', 'original_stop_loss',
+         'original_take_profit', 'stop_price']
+    ]
+
 
     # Create a table of the proposed trades
     proposed_trades_table = display_lib.dataframe_to_table(
-        dataframe=strategy_candlesticks,
+        dataframe=proposed_trades,
         title="Proposed Trades"
     )
 

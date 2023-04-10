@@ -69,13 +69,14 @@ def macd_crossover_strategy(time_to_test, time_to_cancel, macd_fast=12, macd_slo
     )
     if data is False:
         return False
-    # Extract only the true values from the dataframe
-    data = data[data["crossover"] == True]
-    # Step 4: Update Dataframe with a column for trade cancellation
+    # If Time to Cancel set to the next candle, shift the dataframe
     if time_to_cancel == "Candle":
         # Update the dataframe with the human_time from the next column
         data["cancel_time"] = data["human_time"].shift(-1)
-    elif time_to_cancel == "GTC":
+    # Extract only the true values from the dataframe
+    data = data[data["crossover"] == True]
+    # Step 4: Update Dataframe with a column for trade cancellation
+    if time_to_cancel == "GTC":
         # Update the dataframe with a value of "GTC"
         data["cancel_time"] = "GTC"
     elif time_to_cancel == "OCO":

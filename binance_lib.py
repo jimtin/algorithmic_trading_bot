@@ -136,6 +136,10 @@ def set_query_timeframe(timeframe):
 def place_order(order_type, symbol, quantity, stop_loss, stop_price, take_profit, comment, project_settings, direct=False):
     """
     Function to place an order on Binance. Checks to see if the order is valid first.
+    Documentation:
+    https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#new-order--trade
+    https://github.com/binance/binance-connector-python/blob/master/examples/spot/trade/new_order.py
+    https://github.com/binance/binance-connector-python/blob/master/examples/spot/trade/new_order_testing.py
     :param order_type: string of the order type. Options are "BUY_STOP" or "SELL_STOP"
     :param symbol: string of the symbol to be traded. Must be Binance compatible.
     :param quantity: Float of the quantity to be traded.
@@ -191,6 +195,7 @@ def place_order(order_type, symbol, quantity, stop_loss, stop_price, take_profit
     if direct:
         try:
             response = client.new_order(**parameters)
+            print(response)
         except Exception as e:
             print("Order Failed")
             print(e)
@@ -223,3 +228,69 @@ def place_order(order_type, symbol, quantity, stop_loss, stop_price, take_profit
 
     # Step 3: Return the outcome
     return response
+
+
+# Function to get a list of current orders on Binance
+def get_open_orders(project_settings, symbol):
+    """
+    Function to get a list of current orders on Binance
+    Documentation:
+    https://github.com/binance/binance-connector-python/blob/master/examples/spot/trade/get_orders.py
+    https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#all-orders-user_data
+    :param project_settings: json dictionary of the project settings
+    :param symbol: string of the symbol to get orders on. Default is none, which will return all orders
+    :return: dataframe of the order(s)
+    """
+    # Psuedocode
+    # 1. Get the API keys
+    # 2. Set up the client
+    # 3. Get the orders
+    # 4. Return the orders
+
+    # Step 1: Get the API keys
+    api_key, secret_key = get_api_keys(project_settings=project_settings)
+
+    # Step 2: Set up the client
+    client = Client(api_key, secret_key)
+
+    # Step 3: Get the orders
+    # If the symbol is not provided, get all orders
+    orders = client.get_open_orders(symbol=symbol)
+
+    # Step 4: Return the orders
+    return orders
+
+
+# Function to cancel an order on Binance
+def cancel_order(project_settings, symbol, order_id):
+    """
+    Function to cancel an order on Binance
+    Documentation: https://github.com/binance/binance-connector-python/blob/master/examples/spot/trade/cancel_order.py
+    :param project_settings: json dictionary of the project settings
+    :param symbol: string of the symbol to cancel the order on
+    :param order_id: string of the order id to cancel the order on
+    :return: True if the order was cancelled, False if not
+    """
+    # Psuedocode
+    # 1. Get the API keys
+    # 2. Set up the client
+    # 3. Cancel the order
+    # 4. Return the outcome
+
+    # Step 1: Get the API keys
+    api_key, secret_key = get_api_keys(project_settings=project_settings)
+
+    # Step 2: Set up the client
+    client = Client(api_key, secret_key)
+
+    # Step 3: Cancel the order
+    try:
+        response = client.cancel_order(symbol=symbol, orderId=order_id)
+        print(response)
+        outcome = True
+    except Exception as e:
+        print(e)
+        outcome = False
+
+    # Step 4: Return the outcome
+    return outcome

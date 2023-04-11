@@ -72,6 +72,7 @@ if __name__ == '__main__':
     # Start a Performance timer
     perf_start = time.perf_counter()
     # Try making a trade
+    """
     trade = binance_lib.place_order(
         order_type="BUY_STOP",
         symbol="BTCUSDT",
@@ -82,6 +83,17 @@ if __name__ == '__main__':
         comment=comment,
         project_settings=project_settings
     )
+    
+    # Get a list of all open orders
+    open_orders = binance_lib.get_open_orders(project_settings=project_settings, symbol="BTCUSDT")
+    print(open_orders)
+    """
+    cancel_order = binance_lib.cancel_order(
+        symbol="BTCUSDT",
+        order_id="20763567766",
+        project_settings=project_settings
+    )
+    print(cancel_order)
 
 
 

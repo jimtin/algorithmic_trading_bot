@@ -28,8 +28,6 @@ If you want to follou our journey, you can do so here:
 This bot is designed as a helper tool for the AlgoQuant.Trade platform. It is designed to be used in conjunction with 
 our various media forms, such as YouTube and Medium. It is not designed to be used as a standalone product.
 
-If you are looking for a standalone product, please check out our [AlgoQuant.Trade AutoTrading Bot](https://github.com/jimtin/python_trading_bot)
-
 ## How To Guides and Tutorials
 ### YouTube
 #### Series: Build Your Own MetaTrader 5 Python Trading Bot

@@ -14,7 +14,7 @@ We love connecting with our audience! Join us on the following links:
 ## How To Guides and Tutorials
 ### YouTube
 #### Series: Build Your Own MetaTrader 5 Python Trading Bot
-YouTube channel [algoquant_trade](https://www.youtube.com/@algoquant_trade) contains tons of helpful content on how
+YouTube channel [TradeOxy](https://www.youtube.com/@tradeoxy) contains tons of helpful content on how
 to use the Algo Trading Bot or build one for yourself. Check out these episodes:
 1. [Secure Setup](https://www.youtube.com/watch?v=jpw3JltNMg0)
 2. [Connect To MetaTrader 5 with Python](https://www.youtube.com/watch?v=EkP7iAZoMEw&t=2s)
